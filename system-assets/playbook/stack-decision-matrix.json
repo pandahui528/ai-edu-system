@@ -1,0 +1,67 @@
+{
+  "version": "0.1",
+  "inputs": {
+    "interaction_mode": ["miniprogram", "h5", "mp+webview", "official_account", "video_account"],
+    "input_type": ["text", "image", "audio", "video", "file"],
+    "max_file_size": ["<10MB", "10-50MB", "50-200MB", ">200MB"],
+    "latency": ["instant(<3s)", "short(<10s)", "async(可等待)"],
+    "login": ["none", "wechat_login", "org_account"],
+    "compliance": ["china_required(必须国内)", "global_ok"],
+    "concurrency": ["low(<50/d)", "mid(<5k/d)", "high(>5k/d)"],
+    "cost_sensitivity": ["high", "medium", "low"]
+  },
+  "default_recommendation": {
+    "frontend": "miniprogram + optional H5 WebView",
+    "backend": "CloudBase 云函数（HTTP 触发）",
+    "storage": "COS + CloudBase Storage",
+    "auth": "微信登录（如需要）",
+    "llm": "国内可用模型（腾讯混元 / 火山·豆包）",
+    "observability": "traceId + 统一错误码 + 日志字段",
+    "fallback": "不可用时返回可解释降级结果"
+  },
+  "rules": [
+    {
+      "if": { "max_file_size": ">=10MB" },
+      "then": {
+        "upload_strategy": "客户端直传 COS 或分片上传 COS",
+        "forbid": "base64 走 JSON 进云函数",
+        "server_accept": "cosKey + metadata"
+      }
+    },
+    {
+      "if": { "latency": ">10s" },
+      "then": {
+        "execution": "异步任务队列/延迟处理",
+        "fallback": "轮询 + jobId 最小实现"
+      }
+    },
+    {
+      "if": { "latency": "instant(<3s)", "llm_stability": "unstable" },
+      "then": {
+        "response": "先返回结构化占位结果 + 后补齐"
+      }
+    },
+    {
+      "if": { "needs": "公网回调/长连接/复杂路由" },
+      "then": {
+        "runtime": "CloudBase Run（容器）优先",
+        "function_role": "云函数只做轻接口"
+      }
+    },
+    {
+      "if": { "compliance": "china_required(必须国内)" },
+      "then": {
+        "forbid": "Firebase/Vercel/海外模型默认路径",
+        "choose": "国内云 + 国内模型 + 国内对象存储"
+      }
+    }
+  ],
+  "cost_confirmation": {
+    "threshold_monthly_cny": 500,
+    "trigger_if": [
+      "新增付费第三方（短信/OCR/付费模型/大流量 CDN/付费队列）",
+      "预计月成本超过阈值"
+    ],
+    "otherwise": "默认按免费额度/最低配置推进"
+  }
+}
