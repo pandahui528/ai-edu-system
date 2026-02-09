@@ -1,0 +1,12 @@
+{
+  "interaction_mode": "miniprogram",
+  "input_type": "image",
+  "max_file_size_mb": 5,
+  "latency": "instant",
+  "login": "wechat_login",
+  "compliance": "china_required",
+  "concurrency": "low",
+  "cost_sensitivity": "high",
+  "llm_stability": "stable",
+  "needs_complex_routing": false
+}

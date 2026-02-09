@@ -1,0 +1,12 @@
+{
+  "interaction_mode": "h5",
+  "input_type": "text",
+  "max_file_size_mb": 1,
+  "latency": "instant",
+  "login": "none",
+  "compliance": "global_ok",
+  "concurrency": "low",
+  "cost_sensitivity": "low",
+  "llm_stability": "unstable",
+  "needs_complex_routing": false
+}
