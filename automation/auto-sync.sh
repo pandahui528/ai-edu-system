@@ -26,8 +26,12 @@ base_sha="$(git merge-base @ @{u})"
 if [ "$local_sha" = "$remote_sha" ]; then
   :
 elif [ "$local_sha" = "$base_sha" ]; then
-  log "behind remote; manual pull required"
-  exit 0
+  if [ -z "$(git status --porcelain)" ]; then
+    git pull --ff-only origin HEAD >/dev/null 2>&1 || { log "auto pull failed"; exit 0; }
+  else
+    log "behind remote with local changes; skip auto pull"
+    exit 0
+  fi
 elif [ "$remote_sha" = "$base_sha" ]; then
   :
 else
