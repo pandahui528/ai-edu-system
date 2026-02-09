@@ -66,6 +66,32 @@
 
 ---
 
+## Skill Registry 合规与调用台账（Compliance）
+
+1. Skill 调用优先级  
+   - Mandatory Skill：必须调用  
+   - Default Skill：优先调用  
+   - Experimental Skill：仅在必要时调用，并说明原因
+
+2. Skill Usage Ledger 要求  
+   - 每次阶段性交付必须附带 Ledger  
+   - Ledger 中必须标注：  
+     - Skill Name  
+     - Registry Status  
+     - 是否为 Default Skill  
+     - 调用目的  
+     - 对输出的影响  
+     - 是否产生费用
+
+3. 合规失败处理  
+   - 使用未登记 Skill  
+   - 使用 Deprecated Skill  
+   - 或缺失 Ledger  
+
+   → 交付无效，系统必须阻断流程并要求补齐
+
+---
+
 ## 系统宪法级约束（必须遵守）
 【Human-in-the-loop 规则】
 - 人类是系统中唯一的最终裁决者

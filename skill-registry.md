@@ -48,8 +48,8 @@ Tool / MCP 是 Skill 的实现方式之一。
 
 所有 Skill 必须以表格形式登记如下字段：
 
-| Skill Name | Category | Description | Used By Agent | Stage | Mandatory | MCP Required | Cost Level | Risk Level | Status |
-|-----------|----------|-------------|---------------|-------|-----------|--------------|------------|------------|--------|
+| Skill Name | Category | Description | Used By Agent | Stage | Mandatory | Default | MCP Required | Cost Level | Risk Level | Status |
+|-----------|----------|-------------|---------------|-------|-----------|---------|--------------|------------|------------|--------|
 
 字段说明：
 - Skill Name：唯一标识（动词 + 领域）
@@ -57,21 +57,32 @@ Tool / MCP 是 Skill 的实现方式之一。
 - Used By Agent：主要调用的 Agent
 - Stage：主要使用阶段（A / B / C / D）
 - Mandatory：是否必调用（Yes / No）
+- Default：是否默认增强能力（Yes / No）
 - MCP Required：是否依赖 MCP
 - Cost Level：None / Low / Medium / High
 - Risk Level：Low / Medium / High
 - Status：Active / Experimental / Deprecated
 
+Default 说明：
+- Yes：默认增强能力（无需单独登记或审批即可使用）
+- No：非默认能力（使用前需登记或标注）
+
+Mandatory 与 Default 的区别：
+- Mandatory = 最低质量保障线，**必须调用**
+- Default = 已验证的增强能力，**可直接调用但非必须**
+
+Mandatory Skill 的 Default 一律为 Yes。
+
 ## 三、当前已注册 Skill（示例，必须写入）
 
-| Skill Name | Category | Used By Agent | Stage | Mandatory | MCP Required | Cost Level | Risk Level | Status |
-|-----------|----------|---------------|-------|-----------|--------------|------------|------------|--------|
-| validate_market_claim | Built-in | 市场研究 Agent | A | Yes | Optional | Medium | Low | Active |
-| generate_counterarguments | Built-in | 市场研究 Agent | A | Yes | No | None | Low | Active |
-| simulate_user_behavior | Built-in | 产品方案 Agent | A | Yes | No | None | Low | Active |
-| trim_to_mvp | Built-in | 产品方案 Agent | B | Yes | No | None | Low | Active |
-| scan_architecture_risks | Built-in | 技术 Agent | B | Yes | Optional | Low | Medium | Active |
-| extract_reusable_patterns | Built-in | 复盘 Agent | D | Yes | Optional | None | Low | Active |
+| Skill Name | Category | Used By Agent | Stage | Mandatory | Default | MCP Required | Cost Level | Risk Level | Status |
+|-----------|----------|---------------|-------|-----------|---------|--------------|------------|------------|--------|
+| validate_market_claim | Built-in | 市场研究 Agent | A | Yes | Yes | Optional | Medium | Low | Active |
+| generate_counterarguments | Built-in | 市场研究 Agent | A | Yes | Yes | No | None | Low | Active |
+| simulate_user_behavior | Built-in | 产品方案 Agent | A | Yes | Yes | No | None | Low | Active |
+| trim_to_mvp | Built-in | 产品方案 Agent | B | Yes | Yes | No | None | Low | Active |
+| scan_architecture_risks | Built-in | 技术 Agent | B | Yes | Yes | Optional | Low | Medium | Active |
+| extract_reusable_patterns | Built-in | 复盘 Agent | D | Yes | Yes | Optional | None | Low | Active |
 
 ## 四、Skill 调用治理规则（硬约束）
 
@@ -91,6 +102,14 @@ Tool / MCP 是 Skill 的实现方式之一。
 - 所有 Skill 的输出
 - 必须被 Agent 消化并折叠进交付物
 - 禁止将原始结果直接抛给 Human
+
+### 4. Registry 作为唯一合法来源
+- 所有 Agent 仅允许使用 Skill Registry 中登记的 Skill
+- 未登记 Skill 视为不合规，不得用于交付
+
+### 5. Skill Usage Ledger 强制要求
+- 所有阶段性交付必须附带 Skill Usage Ledger
+- Ledger 至少包含：Skill Name / Registry Status / Default / 调用目的 / 影响 / 是否产生费用
 
 ## 五、Skill 生命周期管理
 
@@ -118,6 +137,42 @@ Tool / MCP 是 Skill 的实现方式之一。
 - 多项目验证
 - 对成功率有显著提升
 - 经 Human 确认（系统级决策）
+
+## External Skill 自动升级为 Default 的规则（Capability Promotion）
+
+External Skill 满足以下 **全部条件** 时，  
+可自动升级为 Default = Yes（仍保留 Status = Active）：
+
+1. **多项目验证**
+   - 至少在 2 个不同项目中被调用
+   - 且调用结果被记录在 Skill Usage Ledger 中
+
+2. **正向贡献明确**
+   - 至少在 1 个项目中：
+     - 显著降低不确定性
+     - 或明显提升判断/交付质量
+   - 该贡献在复盘中被明确记录
+
+3. **成本与风险可控**
+   - Cost Level ≤ Medium
+   - Risk Level ≤ Medium
+   - 未触发过超预算或事故级风险
+
+4. **未替代 Mandatory Skill**
+   - 仅作为增强能力存在
+   - 未绕过任何 Mandatory Skill
+
+升级生效规则：
+- Default = Yes 后：
+  - Agent 可直接调用
+  - 无需再单独登记或审批
+- 若未来风险或成本失控：
+  - Default 可被撤销
+  - Status 可回退为 Experimental 或 Deprecated
+
+是否允许 External Skill 升级为 Mandatory：
+- ❌ 不允许自动升级
+- ✅ 仅可经 Human 明确确认（系统级决策）
 
 ## 七、成本与 Human-in-the-loop 规则
 

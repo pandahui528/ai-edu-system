@@ -94,3 +94,20 @@
 
 - 阶段 D（复盘）  
   → 允许充分交流，不设表达次数限制
+
+──────────────────
+## 五、Skill Registry 约束与调用合规
+──────────────────
+
+1. Default Skill 调用规则
+   - Default = Yes 的 Skill：
+     - 可被 Agent 直接调用
+     - 无需额外登记
+   - Default = No 的 Skill：
+     - 使用前必须在 Registry 中登记
+     - External Skill 默认状态为 Experimental
+
+2. 调用优先级建议（非强制）
+   - Mandatory Skill → 必须调用
+   - Default Skill → 优先使用
+   - Experimental Skill → 谨慎使用，并强制记录 Ledger
