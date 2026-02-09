@@ -1,0 +1,38 @@
+name: smoke-tests
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: node -v
+        run: node -v
+      - name: Verify required files
+        run: |
+          test -f api-contract.md
+          test -f env.example
+          test -f smoke-tests/smoke.curl.sh || test -f smoke-tests/smoke.generated.curl.sh
+      - name: Shell syntax check
+        run: |
+          set -e
+          if [ -d smoke-tests ]; then
+            for f in smoke-tests/*.sh; do
+              if [ -f "$f" ]; then
+                bash -n "$f"
+              fi
+            done
+          fi
+      - name: Run smoke if API_BASE provided
+        if: ${{ secrets.API_BASE != '' }}
+        env:
+          API_BASE: ${{ secrets.API_BASE }}
+        run: |
+          if [ -f smoke-tests/smoke.curl.sh ]; then
+            bash smoke-tests/smoke.curl.sh
+          else
+            bash smoke-tests/smoke.generated.curl.sh
+          fi

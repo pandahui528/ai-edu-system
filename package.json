@@ -1,0 +1,8 @@
+{
+  "name": "ai-edu-system",
+  "private": true,
+  "scripts": {
+    "smoke": "bash smoke-tests/smoke.curl.sh || bash smoke-tests/smoke.generated.curl.sh",
+    "hooks:install": "bash scripts/git-hooks/install-hooks.sh"
+  }
+}

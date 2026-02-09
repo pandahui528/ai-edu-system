@@ -1,0 +1,49 @@
+#!/bin/bash
+set -euo pipefail
+
+ROOT="$(git rev-parse --show-toplevel)"
+cd "$ROOT"
+
+UPSTREAM=""
+if git rev-parse --abbrev-ref --symbolic-full-name @{u} >/dev/null 2>&1; then
+  UPSTREAM="@{u}"
+fi
+
+if [ -n "$UPSTREAM" ]; then
+  CHANGED="$(git diff --name-only "$UPSTREAM"...HEAD)"
+else
+  CHANGED="$(git diff --name-only HEAD~1..HEAD 2>/dev/null || true)"
+fi
+
+if [ -z "$CHANGED" ]; then
+  exit 0
+fi
+
+needs_api=0
+while IFS= read -r file; do
+  case "$file" in
+    cloudfunctions/*|cloudbase-backend/*|supabase/functions/*|api/*|system-assets/contracts/*|api-contract.md)
+      needs_api=1
+      break
+      ;;
+  esac
+done <<< "$CHANGED"
+
+if [ "$needs_api" -ne 1 ]; then
+  exit 0
+fi
+
+if [ -z "${API_BASE:-}" ]; then
+  echo "API_BASE is required to run smoke tests before push."
+  echo "Set it like: API_BASE=https://your-api.example.com git push"
+  exit 1
+fi
+
+if [ -f "$ROOT/smoke-tests/smoke.curl.sh" ]; then
+  bash "$ROOT/smoke-tests/smoke.curl.sh"
+elif [ -f "$ROOT/smoke-tests/smoke.generated.curl.sh" ]; then
+  bash "$ROOT/smoke-tests/smoke.generated.curl.sh"
+else
+  echo "No smoke test script found in smoke-tests/."
+  exit 1
+fi
