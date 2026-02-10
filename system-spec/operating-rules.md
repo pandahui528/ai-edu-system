@@ -188,3 +188,20 @@ AI 执行层负责“把事做出来”。
 强调：
 - Global Retrospective 不参与即时修复
 - 所有角色必须遵守边界
+
+## 失败路由总 Prompt（强制）
+当出现 FAIL 时，必须先进行失败路由：
+
+- 如果失败原因是：
+  构建 / 脚本 / CI / 环境 / 工具 / 契约 / 解析问题
+  → 交给 AI Engineering Reliability
+
+- 如果失败原因是：
+  功能未实现 / 逻辑错误 / 返回值不符
+  → 交给对应的 Frontend / Backend Engineer
+
+- 如果失败涉及：
+  需求不清 / 方案取舍 / 成本影响
+  → 升级 AI Tech Lead 或 Human
+
+禁止越权处理。
