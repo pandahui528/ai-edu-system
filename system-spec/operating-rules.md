@@ -240,3 +240,18 @@ AI 执行层负责“把事做出来”。
 强调：
 - 任意角色越权修改文件，视为系统违规
 - 越权应在 system-check 中被提示
+
+## System Evolution Loop（进化闭环）
+
+明确规则：
+- Global Retrospective 的唯一输出是 insights
+- insights 不直接改规则，而是作为“候选知识”
+- 后续由 AI Tech Lead / AI Engineering Reliability
+  决定是否将 insights 固化进：
+  - playbooks/
+  - system-spec/
+  - prompts
+
+强调：
+- 进化 ≠ 即时修复
+- 进化是“跨项目、跨周期”的

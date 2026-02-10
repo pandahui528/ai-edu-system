@@ -49,6 +49,19 @@
 
 ---
 
+### 标准输出格式（必须遵守）
+
+每次复盘至少输出：
+
+- Context（发生了什么）
+- Failure / Pattern（失败或模式）
+- Lesson（抽象出的经验）
+- Suggested Asset Update（建议写入的系统资产类型）
+  - playbook
+  - rule
+  - prompt
+  - checklist
+
 ## Skill Registry 合规与调用台账（Compliance）
 
 1. Skill 调用优先级  

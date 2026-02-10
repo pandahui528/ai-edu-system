@@ -180,6 +180,14 @@ ownership_hints() {
   fi
 }
 
+insights_presence() {
+  if [ -d "$ROOT/system-assets/insights" ]; then
+    print_result PASS "Insights: system-assets/insights exists"
+  else
+    print_result WARNING "Insights: system-assets/insights missing"
+  fi
+}
+
 write_report() {
   ensure_report_dir
   local branch
@@ -226,6 +234,7 @@ main() {
   contracts_checks
   smoke_tests
   ownership_hints
+  insights_presence
   write_report
 
   echo "Report: $REPORT_PATH"
