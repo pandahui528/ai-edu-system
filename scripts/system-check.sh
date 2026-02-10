@@ -238,6 +238,7 @@ main() {
   write_report
 
   echo "Report: $REPORT_PATH"
+  echo "SYSTEM_CHECK_REPORT=$REPORT_PATH"
   if [ "$FAIL_COUNT" -gt 0 ]; then
     echo "Summary: FAIL"
     exit 1

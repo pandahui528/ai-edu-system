@@ -211,6 +211,13 @@ AI 执行层负责“把事做出来”。
 - 任何组织规则调整后建议运行一次 system-check
 - 报告生成位置：system-assets/reports/
 
+## Auto Trigger Chain（自动触发链）
+- system-check 是“检测器”
+- auto-trigger 是“执行路由器”
+- FAIL 必须生成 dispatch
+- dispatch 的 Owner 由 Failure Routing 决定
+- Global Retrospective 仅在“重复失败/系统性问题”被通知，不参与即时修复
+
 ## File Ownership & Write Boundaries（权威规则）
 
 - AI UI Designer

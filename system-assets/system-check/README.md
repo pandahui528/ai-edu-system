@@ -23,6 +23,11 @@ SMOKE_PROFILE=health-only bash scripts/system-check.sh
 - smoke 脚本不可执行：脚本会尝试 chmod +x
 - 契约缺 endpoint header：合同检查会提示并记录
 
+## Auto Trigger Chain
+- 本地建议使用 advice 模式（默认）
+- CI 建议使用 strict 模式（阻断）
+- 派单文件位置：system-assets/dispatch/
+
 ## Ownership Boundary
 - Ownership Boundary 用于明确各角色的文件写权限范围
 - 若缺失将标记为 WARNING，提示完善协同边界
