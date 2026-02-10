@@ -85,10 +85,26 @@ contract_required_endpoints() {
     fail "Contract file not found: $CONTRACT_FILE"
   fi
   awk '
-    /^## (GET|POST|PUT|DELETE) / {method=$2; path=$3; want=1; next}
-    want && /^[[:space:]]*\+?@smoke:[[:space:]]*required/ {print method " " path; want=0; next}
-    want && /^[[:space:]]*\+?@smoke:[[:space:]]*(optional|later)/ {want=0; next}
-    want {want=0}
+    BEGIN {idx=0}
+    /^## (GET|POST|PUT|DELETE) / {
+      method=$2; path=$3; cur=method " " path;
+      idx++; order[idx]=cur;
+      if (!(cur in smoke)) smoke[cur]="optional";
+      next
+    }
+    /^[[:space:]]*\+?@smoke:[[:space:]]*(required|optional|later)/ {
+      if (cur != "") {
+        match($0, /@[sS]moke:[[:space:]]*(required|optional|later)/, m);
+        if (m[1] != "") smoke[cur]=m[1];
+      }
+      next
+    }
+    END {
+      for (i=1; i<=idx; i++) {
+        e=order[i];
+        if (smoke[e] == "required") print e;
+      }
+    }
   ' "$CONTRACT_FILE"
 }
 
@@ -162,8 +178,11 @@ if [ -z "$required_list" ]; then
   exit 0
 fi
 
-echo "Required endpoints:"
-echo "$required_list"
+echo "Endpoints to be tested (from $CONTRACT_FILE):"
+while IFS= read -r line; do
+  [ -z "$line" ] && continue
+  echo "- $line"
+done <<< "$required_list"
 
 while IFS= read -r line; do
   [ -z "$line" ] && continue
