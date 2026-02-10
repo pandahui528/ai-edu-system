@@ -161,14 +161,19 @@ smoke_tests() {
 }
 
 ownership_hints() {
-  local hit=0
-  if grep -E "ownership|只读|禁止修改" "$ROOT/system-spec/operating-rules.md" >/dev/null 2>&1; then
-    hit=1
+  local op="$ROOT/system-spec/operating-rules.md"
+  if [ ! -f "$op" ]; then
+    print_result WARNING "Ownership boundary hints missing"
+    return
   fi
-  if grep -R -E "ownership|只读|禁止修改" "$ROOT/system-assets" >/dev/null 2>&1; then
-    hit=1
-  fi
-  if [ "$hit" -eq 1 ]; then
+
+  local ok=1
+  grep -E "File Ownership" "$op" >/dev/null || ok=0
+  grep -E "AI Frontend Engineer" "$op" >/dev/null || ok=0
+  grep -E "AI Backend Engineer" "$op" >/dev/null || ok=0
+  grep -E "AI Engineering Reliability" "$op" >/dev/null || ok=0
+
+  if [ "$ok" -eq 1 ]; then
     print_result PASS "Ownership boundary hints present"
   else
     print_result WARNING "Ownership boundary hints missing"

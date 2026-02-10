@@ -22,3 +22,8 @@ SMOKE_PROFILE=health-only bash scripts/system-check.sh
 - API_BASE 未设置：仅执行离线检查，不跑在线 smoke
 - smoke 脚本不可执行：脚本会尝试 chmod +x
 - 契约缺 endpoint header：合同检查会提示并记录
+
+## Ownership Boundary
+- Ownership Boundary 用于明确各角色的文件写权限范围
+- 若缺失将标记为 WARNING，提示完善协同边界
+- 这是协同正确性的基础设施，不是 bug

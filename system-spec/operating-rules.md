@@ -210,3 +210,33 @@ AI 执行层负责“把事做出来”。
 - system-check 用于验证系统调度、边界、失败路由与可复现性
 - 任何组织规则调整后建议运行一次 system-check
 - 报告生成位置：system-assets/reports/
+
+## File Ownership & Write Boundaries（权威规则）
+
+- AI UI Designer
+  - 可写目录：ui/, design/, styles/
+  - 禁止写：业务逻辑代码、后端代码、工程脚本
+
+- AI Frontend Engineer
+  - 可写目录：frontend/, web/, pages/, components/
+  - 禁止写：backend/, scripts/, system-spec/
+
+- AI Backend Engineer
+  - 可写目录：backend/, api/, cloudfunctions/
+  - 禁止写：frontend/, scripts/, system-spec/
+
+- AI QA Engineer
+  - 只读：全仓库
+  - 允许写：system-assets/reports/
+
+- AI Engineering Reliability
+  - 可写目录：scripts/, smoke-tests/, system-spec/, contracts/
+  - 禁止写：任何业务代码目录
+
+- Global Retrospective / Evolution Agent
+  - 不参与项目代码修改
+  - 允许写：system-assets/insights/
+
+强调：
+- 任意角色越权修改文件，视为系统违规
+- 越权应在 system-check 中被提示
