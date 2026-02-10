@@ -84,28 +84,49 @@ contract_required_endpoints() {
   if [ ! -f "$CONTRACT_FILE" ]; then
     fail "Contract file not found: $CONTRACT_FILE"
   fi
-  awk '
-    BEGIN {idx=0}
-    /^## (GET|POST|PUT|DELETE) / {
-      method=$2; path=$3; cur=method " " path;
-      idx++; order[idx]=cur;
-      if (!(cur in smoke)) smoke[cur]="optional";
-      next
-    }
-    /^[[:space:]]*\+?@smoke:[[:space:]]*(required|optional|later)/ {
-      if (cur != "") {
-        match($0, /@[sS]moke:[[:space:]]*(required|optional|later)/, m);
-        if (m[1] != "") smoke[cur]=m[1];
+  # ---- contract parse (POSIX awk, macOS compatible) ----
+  REQUIRED_ENDPOINTS="$(
+    awk '
+      function flush() {
+        if (method != "" && path != "") {
+          level = (smoke_level != "" ? smoke_level : "optional")
+          if (level == "required") {
+            print method " " path
+          }
+        }
       }
-      next
-    }
-    END {
-      for (i=1; i<=idx; i++) {
-        e=order[i];
-        if (smoke[e] == "required") print e;
+
+      BEGIN {
+        method = ""
+        path = ""
+        smoke_level = ""
       }
-    }
-  ' "$CONTRACT_FILE"
+
+      # Endpoint header: ## METHOD /path
+      $0 ~ /^##[[:space:]]+(GET|POST|PUT|DELETE)[[:space:]]+\// {
+        flush()
+        method = $2
+        path = $3
+        smoke_level = ""
+        next
+      }
+
+      # Smoke annotation (allow leading space and optional '+')
+      $0 ~ /^[[:space:]]*\+?@smoke:[[:space:]]*/ {
+        line = $0
+        sub(/^[[:space:]]*\+?@smoke:[[:space:]]*/, "", line)
+        sub(/[[:space:]].*$/, "", line)
+        smoke_level = line
+        next
+      }
+
+      END {
+        flush()
+      }
+    ' "$CONTRACT_FILE"
+  )"
+  # ----------------------------------------------------
+  printf "%s\n" "$REQUIRED_ENDPOINTS"
 }
 
 contract_request() {
