@@ -47,19 +47,17 @@ syntax_check() {
   fi
 }
 
-if [ -z "${API_BASE:-}" ] && [ -z "${API_BASE_URL:-}" ]; then
+if [ -z "${API_BASE:-}" ]; then
   warn "API_BASE is not set. Skipping live smoke; running syntax checks only."
+  warn "Set it like: API_BASE=https://your-api.example.com git push"
   syntax_check
   exit 0
 fi
 
-if [ -z "${API_BASE_URL:-}" ] && [ -n "${API_BASE:-}" ]; then
-  export API_BASE_URL="${API_BASE}"
-fi
-
-health_code="$(curl -sS -o /dev/null -w "%{http_code}" "${API_BASE_URL}/health" || echo "000")"
+health_code="$(curl -sS -o /dev/null -w "%{http_code}" "${API_BASE}/health" || echo "000")"
 if [ "$health_code" != "200" ]; then
   warn "Health check failed (status $health_code). Skipping live smoke; running syntax checks only."
+  warn "Possible causes: CloudBase root domain not mapped or /health unavailable."
   syntax_check
   exit 0
 fi
@@ -69,9 +67,9 @@ if [ -z "${SMOKE_PROFILE:-}" ]; then
 fi
 
 if [ -f "$ROOT/smoke-tests/smoke.curl.sh" ]; then
-  bash "$ROOT/smoke-tests/smoke.curl.sh"
+  API_BASE="$API_BASE" bash "$ROOT/smoke-tests/smoke.curl.sh"
 elif [ -f "$ROOT/smoke-tests/smoke.generated.curl.sh" ]; then
-  bash "$ROOT/smoke-tests/smoke.generated.curl.sh"
+  API_BASE="$API_BASE" bash "$ROOT/smoke-tests/smoke.generated.curl.sh"
 else
   echo "No smoke test script found in smoke-tests/."
   exit 1

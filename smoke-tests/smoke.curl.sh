@@ -1,10 +1,17 @@
 #!/bin/bash
 set -euo pipefail
 
-BASE_URL="${API_BASE_URL:-http://localhost:3000}"
+if [ -z "${API_BASE:-}" ]; then
+  echo "API_BASE is required. Example:"
+  echo "API_BASE=https://your-api.example.com SMOKE_PROFILE=health-only bash smoke-tests/smoke.curl.sh"
+  exit 2
+fi
+
+BASE_URL="${API_BASE}"
 MAX_POLL="${MAX_POLL:-5}"
 SLEEP_SEC="${SLEEP_SEC:-2}"
 PROFILE="${SMOKE_PROFILE:-core-sync}"
+echo "API_BASE=$BASE_URL"
 echo "SMOKE_PROFILE=$PROFILE"
 
 log() { printf "%s\n" "$1"; }
