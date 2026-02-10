@@ -63,8 +63,8 @@ repo_sanity() {
 
 agent_presence() {
   local required=(
-    "agents/03_tech-cto.md"
-    "agents/04_user-validation.md"
+    "agents/03_ai-tech-lead.md"
+    "agents/04_ai-qa-engineer.md"
     "agents/05_global-retrospective.md"
     "agents/06_engineering-reliability.md"
   )

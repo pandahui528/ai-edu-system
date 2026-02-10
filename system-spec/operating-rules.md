@@ -155,11 +155,11 @@ AI 执行层负责“把事做出来”。
 
 ## 角色命名映射（文件名 ≠ 岗位名）
 
-- agents/03_tech-cto.md
+- agents/03_ai-tech-lead.md
   → 岗位命名：AI Tech Lead
   → 职责与原 CTO 定义一致，仅命名升级
 
-- agents/04_user-validation.md
+- agents/04_ai-qa-engineer.md
   → 岗位命名：AI QA Engineer
   → 职责与原验证智能体一致
 
