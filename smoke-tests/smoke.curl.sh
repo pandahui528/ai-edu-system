@@ -86,7 +86,8 @@ contract_required_endpoints() {
   fi
   awk '
     /^## (GET|POST|PUT|DELETE) / {method=$2; path=$3; want=1; next}
-    want && /^@smoke:[[:space:]]*required/ {print method " " path; want=0; next}
+    want && /^[[:space:]]*\+?@smoke:[[:space:]]*required/ {print method " " path; want=0; next}
+    want && /^[[:space:]]*\+?@smoke:[[:space:]]*(optional|later)/ {want=0; next}
     want {want=0}
   ' "$CONTRACT_FILE"
 }
