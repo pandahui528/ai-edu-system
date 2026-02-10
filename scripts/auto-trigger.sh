@@ -41,16 +41,27 @@ if [ -n "$REPORT_PATH" ] && [ -f "$REPORT_PATH" ]; then
 fi
 
 ROUTED_OWNER="AI Engineering Reliability"
-ROUTED_REASON="default engineering routing"
+ROUTED_REASON="engineering/tooling failure"
 
-if echo "$FAIL_LINES" | grep -E "Ownership boundary|Failure Routing" >/dev/null 2>&1; then
-  ROUTED_OWNER="AI Tech Lead"
-  ROUTED_REASON="missing or invalid rules"
+RULE_MATCHED=0
+ENG_MATCHED=0
+
+# Rule/spec violations -> AI Tech Lead (highest priority)
+if echo "$FAIL_LINES" | grep -E "Global system:|System spec:|Operating rules:|Ownership boundary" >/dev/null 2>&1; then
+  RULE_MATCHED=1
 fi
 
-if echo "$FAIL_LINES" | grep -E "Smoke:|Contracts:|Repo sanity:|System spec:|Global system:" >/dev/null 2>&1; then
+# Engineering/tooling failures -> AI Engineering Reliability
+if echo "$FAIL_LINES" | grep -E "Smoke:|Contracts:|Repo sanity:" >/dev/null 2>&1; then
+  ENG_MATCHED=1
+fi
+
+if [ "$RULE_MATCHED" -eq 1 ]; then
+  ROUTED_OWNER="AI Tech Lead"
+  ROUTED_REASON="rule/spec violation detected"
+elif [ "$ENG_MATCHED" -eq 1 ]; then
   ROUTED_OWNER="AI Engineering Reliability"
-  ROUTED_REASON="engineering/system checks failed"
+  ROUTED_REASON="engineering/tooling checks failed"
 fi
 
 if [ -n "$REPORT_PATH" ] && [ -f "$REPORT_PATH" ]; then
