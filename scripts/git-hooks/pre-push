@@ -74,3 +74,10 @@ else
   echo "No smoke test script found in smoke-tests/."
   exit 1
 fi
+
+# Auto-trigger chain (optional)
+if [ "${ENABLE_AUTO_TRIGGER:-0}" = "1" ]; then
+  AUTO_TRIGGER_MODE="${AUTO_TRIGGER_MODE:-strict}" bash "$ROOT/scripts/auto-trigger.sh"
+else
+  echo "Tip: ENABLE_AUTO_TRIGGER=1 to run auto-trigger gate"
+fi

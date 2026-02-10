@@ -53,9 +53,11 @@ repo_sanity() {
   fi
 
   if [ -d "$ROOT/contracts" ]; then
-    print_result WARNING "Repo sanity: contracts/ exists (unexpected location)"
+    print_result PASS "Repo sanity: contracts/ exists"
+  elif [ -d "$ROOT/system-assets/contracts" ]; then
+    print_result PASS "Repo sanity: system-assets/contracts exists"
   else
-    print_result WARNING "Repo sanity: contracts/ missing (ok if not used)"
+    print_result WARNING "Repo sanity: contracts missing (ok if not used)"
   fi
 }
 

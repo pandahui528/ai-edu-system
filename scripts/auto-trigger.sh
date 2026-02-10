@@ -43,6 +43,7 @@ fi
 ROUTED_OWNER=""
 ROUTED_REASON=""
 ROUTING_MATCH=""
+FIX_TARGET=""
 
 RULE_MATCHED=0
 ENG_MATCHED=0
@@ -64,14 +65,17 @@ if [ "$RULE_MATCHED" -eq 1 ]; then
   ROUTED_OWNER="AI Tech Lead"
   ROUTED_REASON="rule/spec violation detected"
   ROUTING_MATCH="rule/spec"
+  FIX_TARGET="system-spec/global-system.md"
 elif [ "$ENG_MATCHED" -eq 1 ]; then
   ROUTED_OWNER="AI Engineering Reliability"
   ROUTED_REASON="tooling/environment error detected"
   ROUTING_MATCH="tooling/env"
+  FIX_TARGET="scripts/ smoke-tests/ contracts/"
 else
   ROUTED_OWNER="AI Engineering Reliability"
   ROUTED_REASON="unclassified failure; default routing"
   ROUTING_MATCH="default"
+  FIX_TARGET="scripts/ smoke-tests/ contracts/"
 fi
 
 if [ "${AUTO_TRIGGER_DEBUG:-}" = "1" ]; then
@@ -102,7 +106,7 @@ if [ -n "${API_BASE:-}" ]; then
   SUGGESTED_CMD="API_BASE=$API_BASE bash scripts/system-check.sh"
 fi
 if [ "$ROUTED_OWNER" = "AI Tech Lead" ]; then
-  SUGGESTED_CMD="编辑 system-spec/global-system.md 修复缺失关键字后，再运行 bash scripts/system-check.sh"
+  SUGGESTED_CMD="1) 编辑 system-spec/global-system.md：恢复/补回缺失关键字（例如 'AI Tech Lead'）或修正命名映射导致的缺失\n2) 运行：bash scripts/system-check.sh\n3) 运行：AUTO_TRIGGER_MODE=strict bash scripts/auto-trigger.sh（复验触发链）"
 fi
 
 GUARDRAILS="- 必须遵守 File Ownership & Write Boundaries\n- 必须遵守 Failure Routing\n- 不得越权处理"
@@ -129,6 +133,9 @@ GUARDRAILS="- 必须遵守 File Ownership & Write Boundaries\n- 必须遵守 Fai
   echo
   echo "## Routed Owner"
   echo "- $ROUTED_OWNER"
+  echo
+  echo "## Fix Target"
+  echo "- $FIX_TARGET"
   echo
   echo "## Suggested Next Command"
   echo "- $SUGGESTED_CMD"
