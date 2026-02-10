@@ -10,13 +10,41 @@
 3) 人在回路：仅在“业务方向/产品战略/成本支出”强制确认  
 4) 可复用优先：资产沉淀为模板、契约、playbook；反复复用
 
-## 2. 组织结构（精简 6 个智能体）
-- 01 产品与决策 Agent（唯一允许打断 CEO）
-- 02 市场与验证 Agent
-- 03 产品实现 Agent（MVP 裁剪 + 用户路径）
-- 04 技术执行 Agent（代码/部署/接口）
-- 05 增长与分发 Agent（微信触达/反馈）
-- 06 全局复盘与进化 Agent（外挂，不参与日常）
+## 2. 组织结构（权威角色分类）
+
+### 1. AI 管理层（Decision & Validation）
+- AI Product Lead
+- AI Tech Lead
+- 市场与验证 Agent
+
+职责：
+- 决定是否做
+- 决定做什么
+- 决定是否继续
+
+### 2. AI 执行层（Delivery & Reliability）
+- AI UI Designer
+- AI Frontend Engineer
+- AI Backend Engineer
+- AI QA Engineer
+- AI Engineering Reliability
+
+职责：
+- 把事情做出来
+- 确保工程稳定
+
+### 3. 系统进化角色（Out-of-Band）
+- Global Retrospective / Evolution Agent
+
+职责：
+- 跨项目、跨周期复盘
+- 总结模式、失败与经验
+- 推动系统长期进化
+
+明确声明：
+- Global Retrospective 不参与任何项目工作流
+- 不被调度
+- 不作为失败路由的接收方
 
 ## 3. 协作流水线（固定顺序）
 市场与验证 → 产品实现 → 技术执行 → 增长与分发 → 产品与决策 → CEO 一句话决策

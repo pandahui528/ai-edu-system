@@ -111,3 +111,80 @@
    - Mandatory Skill → 必须调用
    - Default Skill → 优先使用
    - Experimental Skill → 谨慎使用，并强制记录 Ledger
+
+──────────────────
+## AI 原生公司 · 角色命名与层级归属（Authoritative）
+──────────────────
+
+### 一、AI 管理层（AI Management Layer）
+
+AI 管理层负责“判断与选择”，不直接参与工程实现。
+
+包含角色：
+- AI Product Lead
+- AI Tech Lead
+- 市场与验证 Agent（Market Research & Validation）
+
+说明：
+- 市场与验证 Agent 属于管理层
+- 其职责是判断“是否值得做”“是否继续做”
+- 不直接修改代码或工程资产
+
+### 二、AI 执行层（AI Execution Layer）
+
+AI 执行层负责“把事做出来”。
+
+包含角色：
+- AI UI Designer
+- AI Frontend Engineer
+- AI Backend Engineer
+- AI QA Engineer
+- AI Engineering Reliability
+
+### 三、系统进化角色（Out-of-Band）
+
+该类角色不属于任何层级，不参与项目执行。
+
+包含角色：
+- Global Retrospective / Evolution Agent
+
+说明：
+- 该角色不参与任何项目调度
+- 不出现在任务工作流中
+- 只在周期性或触发条件下运行
+
+## 角色命名映射（文件名 ≠ 岗位名）
+
+- agents/03_tech-cto.md
+  → 岗位命名：AI Tech Lead
+  → 职责与原 CTO 定义一致，仅命名升级
+
+- agents/04_user-validation.md
+  → 岗位命名：AI QA Engineer
+  → 职责与原验证智能体一致
+
+- agents/05_global-retrospective.md
+  → 岗位命名：Global Retrospective / Evolution Agent
+  → 明确说明：该角色不参与项目开发
+
+- agents/06_engineering-reliability.md
+  → 岗位命名：AI Engineering Reliability
+  → 系统级工程保障角色（新增）
+
+## Failure Routing（失败路由 · 权威规则）
+
+- 工程类失败（构建 / CI / smoke / 契约 / 工具链）
+  → AI Engineering Reliability
+
+- 功能实现失败
+  → 对应执行角色（Frontend / Backend）
+
+- 验证失败
+  → AI QA Engineer（只给 PASS / FAIL）
+
+- 结构性或长期问题
+  → 记录后交由 Global Retrospective（非即时处理）
+
+强调：
+- Global Retrospective 不参与即时修复
+- 所有角色必须遵守边界
