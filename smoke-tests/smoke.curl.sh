@@ -10,9 +10,12 @@ fi
 BASE_URL="${API_BASE}"
 MAX_POLL="${MAX_POLL:-5}"
 SLEEP_SEC="${SLEEP_SEC:-2}"
-PROFILE="${SMOKE_PROFILE:-core-sync}"
+PROFILE="${SMOKE_PROFILE:-}"
+MODE="${SMOKE_MODE:-contract}"
+CONTRACT_FILE="${CONTRACT_FILE:-api-contract.md}"
 echo "API_BASE=$BASE_URL"
 echo "SMOKE_PROFILE=$PROFILE"
+echo "SMOKE_MODE=$MODE"
 
 log() { printf "%s\n" "$1"; }
 fail() { log "FAIL: $1"; exit 1; }
@@ -77,22 +80,93 @@ jobs_poll() {
   fail "job not finished after $MAX_POLL polls"
 }
 
-case "$PROFILE" in
-  health-only)
-    health
-    ;;
-  core-sync)
-    health
-    jobs_analyze
-    ;;
-  upload+jobs)
-    health
-    upload_credential
-    jobs_analyze
-    jobs_poll
-    ;;
-  *)
-    echo "Unknown SMOKE_PROFILE=$PROFILE"
-    exit 2
-    ;;
-esac
+contract_required_endpoints() {
+  if [ ! -f "$CONTRACT_FILE" ]; then
+    fail "Contract file not found: $CONTRACT_FILE"
+  fi
+  awk '
+    /^## (GET|POST|PUT|DELETE) / {method=$2; path=$3; want=1; next}
+    want && /^@smoke:[[:space:]]*required/ {print method " " path; want=0; next}
+    want {want=0}
+  ' "$CONTRACT_FILE"
+}
+
+contract_request() {
+  local method="$1"
+  local path="$2"
+  local url_path="$path"
+  url_path="${url_path//:jobId/job_123}"
+
+  local body=""
+  if [ "$method" = "POST" ] || [ "$method" = "PUT" ] || [ "$method" = "DELETE" ]; then
+    if [ "$path" = "/upload/credential" ]; then
+      body='{"contentType":"image/jpeg","size":12345,"sha256":"test"}'
+    elif [ "$path" = "/jobs/analyze" ]; then
+      body='{"input":{"type":"image","cosKey":"uploads/placeholder.jpg"},"options":{"mode":"extract_template_info"}}'
+    else
+      body='{}'
+    fi
+    resp="$(curl -sS -X "$method" -H 'Content-Type: application/json' -d "$body" -w "\n%{http_code}" "$BASE_URL$url_path")"
+  else
+    resp="$(curl -sS -X "$method" -w "\n%{http_code}" "$BASE_URL$url_path")"
+  fi
+
+  body_text="$(echo "$resp" | sed '$d')"
+  code="$(echo "$resp" | tail -n 1)"
+  echo "$body_text"
+  print_trace "$body_text"
+
+  if echo "$body_text" | grep -q "INVALID_PATH"; then
+    fail "$method $path INVALID_PATH"
+  fi
+  if [ "$code" = "404" ]; then
+    fail "$method $path status 404"
+  fi
+  if [ "$code" -lt 200 ] || [ "$code" -ge 300 ]; then
+    fail "$method $path status $code"
+  fi
+}
+
+run_profile() {
+  local p="$1"
+  case "$p" in
+    health-only)
+      health
+      ;;
+    core-sync)
+      health
+      jobs_analyze
+      ;;
+    upload+jobs)
+      health
+      upload_credential
+      jobs_analyze
+      jobs_poll
+      ;;
+    *)
+      echo "Unknown SMOKE_PROFILE=$p"
+      exit 2
+      ;;
+  esac
+}
+
+if [ -n "$PROFILE" ]; then
+  run_profile "$PROFILE"
+  exit 0
+fi
+
+required_list="$(contract_required_endpoints)"
+if [ -z "$required_list" ]; then
+  echo "No required endpoints found in $CONTRACT_FILE"
+  exit 0
+fi
+
+echo "Required endpoints:"
+echo "$required_list"
+
+while IFS= read -r line; do
+  [ -z "$line" ] && continue
+  method="$(echo "$line" | awk '{print $1}')"
+  path="$(echo "$line" | awk '{print $2}')"
+  contract_request "$method" "$path"
+done <<< "$required_list"

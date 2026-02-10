@@ -15,23 +15,23 @@
 +- ERR_UPLOAD_SIZE_EXCEEDED / ERR_UPLOAD_EXPIRED / ERR_UPLOAD_FAILED
 +- ERR_JOB_NOT_FOUND / ERR_JOB_FAILED
 +
-+## /health
-+GET /health
++## GET /health
++@smoke: required
 +Response: { "ok": true, "traceId": "..." }
 +
-+## /upload/credential
-+POST /upload/credential
++## POST /upload/credential
++@smoke: optional
 +Request: { "contentType": "image/jpeg", "size": 345678, "sha256": "..." }
 +Response: { "ok": true, "traceId": "...", "data": { "provider": "cos", "tempSecret": {}, "key": "uploads/xxx.jpg", "expireAt": 1234567890 } }
 +
-+## /jobs/analyze
-+POST /jobs/analyze
++## POST /jobs/analyze
++@smoke: optional
 +Request: { "input": { "type": "image", "cosKey": "uploads/xxx.jpg" }, "options": { "mode": "extract_template_info" } }
 +Response（同步完成）: { "ok": true, "traceId": "...", "data": { "result": {} } }
 +Response（异步）: { "ok": true, "traceId": "...", "data": { "jobId": "job_123", "status": "queued" } }
 +
-+## /jobs/:jobId
-+GET /jobs/:jobId
++## GET /jobs/:jobId
++@smoke: optional
 +Response: { "ok": true, "traceId": "...", "data": { "status": "running|done|failed", "result": {} } }
 +
 
@@ -54,22 +54,22 @@
 +- ERR_UPLOAD_SIZE_EXCEEDED / ERR_UPLOAD_EXPIRED / ERR_UPLOAD_FAILED
 +- ERR_JOB_NOT_FOUND / ERR_JOB_FAILED
 +
-+## /health
-+GET /health
++## GET /health
++@smoke: required
 +Response: { "ok": true, "traceId": "..." }
 +
-+## /upload/credential
-+POST /upload/credential
++## POST /upload/credential
++@smoke: optional
 +Request: { "contentType": "image/jpeg", "size": 345678, "sha256": "..." }
 +Response: { "ok": true, "traceId": "...", "data": { "provider": "cos", "tempSecret": {}, "key": "uploads/xxx.jpg", "expireAt": 1234567890 } }
 +
-+## /jobs/analyze
-+POST /jobs/analyze
++## POST /jobs/analyze
++@smoke: optional
 +Request: { "input": { "type": "image", "cosKey": "uploads/xxx.jpg" }, "options": { "mode": "extract_template_info" } }
 +Response（同步完成）: { "ok": true, "traceId": "...", "data": { "result": {} } }
 +Response（异步）: { "ok": true, "traceId": "...", "data": { "jobId": "job_123", "status": "queued" } }
 +
-+## /jobs/:jobId
-+GET /jobs/:jobId
++## GET /jobs/:jobId
++@smoke: optional
 +Response: { "ok": true, "traceId": "...", "data": { "status": "running|done|failed", "result": {} } }
 +
