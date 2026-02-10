@@ -205,3 +205,8 @@ AI 执行层负责“把事做出来”。
   → 升级 AI Tech Lead 或 Human
 
 禁止越权处理。
+
+## System Check & Evidence
+- system-check 用于验证系统调度、边界、失败路由与可复现性
+- 任何组织规则调整后建议运行一次 system-check
+- 报告生成位置：system-assets/reports/
