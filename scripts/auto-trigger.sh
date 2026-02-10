@@ -37,11 +37,12 @@ fi
 
 FAIL_LINES=""
 if [ -n "$REPORT_PATH" ] && [ -f "$REPORT_PATH" ]; then
-  FAIL_LINES="$(grep -E "FAIL:" "$REPORT_PATH" | sed -E 's/^[[:space:]]*(-[[:space:]]*)+//' | grep -E "^FAIL:" | head -n 20)"
+  FAIL_LINES="$(grep -n "FAIL:" "$REPORT_PATH" | sed -E 's/^[0-9]+:[[:space:]]*//; s/^[[:space:]]*(-[[:space:]]*)+//' | grep -E '^FAIL:' | head -n 20)"
 fi
 
-ROUTED_OWNER="AI Engineering Reliability"
-ROUTED_REASON="engineering/tooling failure"
+ROUTED_OWNER=""
+ROUTED_REASON=""
+ROUTING_MATCH=""
 
 RULE_MATCHED=0
 ENG_MATCHED=0
@@ -55,20 +56,33 @@ fi
 if echo "$FAIL_LINES" | grep -E "FAIL: Smoke:|FAIL: Contracts:|FAIL: Repo sanity:" >/dev/null 2>&1; then
   ENG_MATCHED=1
 fi
+if echo "$FAIL_LINES" | grep -E "awk|curl|chmod|permission|INVALID_PATH|INVALID_ENV" >/dev/null 2>&1; then
+  ENG_MATCHED=1
+fi
 
 if [ "$RULE_MATCHED" -eq 1 ]; then
   ROUTED_OWNER="AI Tech Lead"
   ROUTED_REASON="rule/spec violation detected"
+  ROUTING_MATCH="rule/spec"
 elif [ "$ENG_MATCHED" -eq 1 ]; then
   ROUTED_OWNER="AI Engineering Reliability"
   ROUTED_REASON="tooling/environment error detected"
+  ROUTING_MATCH="tooling/env"
+else
+  ROUTED_OWNER="AI Engineering Reliability"
+  ROUTED_REASON="unclassified failure; default routing"
+  ROUTING_MATCH="default"
 fi
 
-if [ -n "$REPORT_PATH" ] && [ -f "$REPORT_PATH" ]; then
-  if grep -E "awk|curl|chmod|permission|INVALID_PATH|INVALID_ENV" "$REPORT_PATH" >/dev/null 2>&1; then
-    ROUTED_OWNER="AI Engineering Reliability"
-    ROUTED_REASON="tooling/environment error detected"
+if [ "${AUTO_TRIGGER_DEBUG:-}" = "1" ]; then
+  echo "AUTO_TRIGGER_DEBUG: fail_lines (normalized)"
+  if [ -n "$FAIL_LINES" ]; then
+    echo "$FAIL_LINES"
+  else
+    echo "(none)"
   fi
+  echo "AUTO_TRIGGER_DEBUG: matched=$ROUTING_MATCH"
+  echo "AUTO_TRIGGER_DEBUG: owner=$ROUTED_OWNER"
 fi
 
 ALSO_NOTIFY=""
@@ -88,7 +102,7 @@ if [ -n "${API_BASE:-}" ]; then
   SUGGESTED_CMD="API_BASE=$API_BASE bash scripts/system-check.sh"
 fi
 if [ "$ROUTED_OWNER" = "AI Tech Lead" ]; then
-  SUGGESTED_CMD="检查并修复 system-spec/global-system.md 的关键字/命名一致性后，再运行 bash scripts/system-check.sh"
+  SUGGESTED_CMD="编辑 system-spec/global-system.md 修复缺失关键字后，再运行 bash scripts/system-check.sh"
 fi
 
 GUARDRAILS="- 必须遵守 File Ownership & Write Boundaries\n- 必须遵守 Failure Routing\n- 不得越权处理"
