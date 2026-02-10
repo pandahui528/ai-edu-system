@@ -37,7 +37,7 @@ fi
 
 FAIL_LINES=""
 if [ -n "$REPORT_PATH" ] && [ -f "$REPORT_PATH" ]; then
-  FAIL_LINES="$(grep -E "^- FAIL:" "$REPORT_PATH" | head -n 20)"
+  FAIL_LINES="$(grep -E "FAIL:" "$REPORT_PATH" | sed -E 's/^[[:space:]]*(-[[:space:]]*)+//' | grep -E "^FAIL:" | head -n 20)"
 fi
 
 ROUTED_OWNER="AI Engineering Reliability"
@@ -47,12 +47,12 @@ RULE_MATCHED=0
 ENG_MATCHED=0
 
 # Rule/spec violations -> AI Tech Lead (highest priority)
-if echo "$FAIL_LINES" | grep -E "Global system:|System spec:|Operating rules:|Ownership boundary" >/dev/null 2>&1; then
+if echo "$FAIL_LINES" | grep -E "FAIL: Global system:|FAIL: System spec:|FAIL: Operating rules:|FAIL: Ownership" >/dev/null 2>&1; then
   RULE_MATCHED=1
 fi
 
 # Engineering/tooling failures -> AI Engineering Reliability
-if echo "$FAIL_LINES" | grep -E "Smoke:|Contracts:|Repo sanity:" >/dev/null 2>&1; then
+if echo "$FAIL_LINES" | grep -E "FAIL: Smoke:|FAIL: Contracts:|FAIL: Repo sanity:" >/dev/null 2>&1; then
   ENG_MATCHED=1
 fi
 
@@ -61,7 +61,7 @@ if [ "$RULE_MATCHED" -eq 1 ]; then
   ROUTED_REASON="rule/spec violation detected"
 elif [ "$ENG_MATCHED" -eq 1 ]; then
   ROUTED_OWNER="AI Engineering Reliability"
-  ROUTED_REASON="engineering/tooling checks failed"
+  ROUTED_REASON="tooling/environment error detected"
 fi
 
 if [ -n "$REPORT_PATH" ] && [ -f "$REPORT_PATH" ]; then
@@ -86,6 +86,9 @@ fi
 SUGGESTED_CMD="bash scripts/system-check.sh"
 if [ -n "${API_BASE:-}" ]; then
   SUGGESTED_CMD="API_BASE=$API_BASE bash scripts/system-check.sh"
+fi
+if [ "$ROUTED_OWNER" = "AI Tech Lead" ]; then
+  SUGGESTED_CMD="检查并修复 system-spec/global-system.md 的关键字/命名一致性后，再运行 bash scripts/system-check.sh"
 fi
 
 GUARDRAILS="- 必须遵守 File Ownership & Write Boundaries\n- 必须遵守 Failure Routing\n- 不得越权处理"
