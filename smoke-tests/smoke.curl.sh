@@ -89,8 +89,10 @@ contract_required_endpoints() {
     awk '
       function flush() {
         if (method != "" && path != "") {
+          endpoints_seen++
           level = (smoke_level != "" ? smoke_level : "optional")
           if (level == "required") {
+            required_count++
             print method " " path
           }
         }
@@ -100,13 +102,26 @@ contract_required_endpoints() {
         method = ""
         path = ""
         smoke_level = ""
+        endpoints_seen = 0
+        required_count = 0
       }
 
-      # Endpoint header: ## METHOD /path
-      $0 ~ /^##[[:space:]]+(GET|POST|PUT|DELETE)[[:space:]]+\// {
+      # Endpoint header: Markdown title or plain/listed method line
+      $0 ~ /^[[:space:]]*##+[[:space:]]+(GET|POST|PUT|DELETE)[[:space:]]+\// {
         flush()
         method = $2
         path = $3
+        smoke_level = ""
+        next
+      }
+      $0 ~ /^[[:space:]]*[-*]?[[:space:]]*(GET|POST|PUT|DELETE)[[:space:]]+\// {
+        flush()
+        method = $1
+        path = $2
+        if (method == "-" || method == "*") {
+          method = $2
+          path = $3
+        }
         smoke_level = ""
         next
       }
@@ -122,10 +137,15 @@ contract_required_endpoints() {
 
       END {
         flush()
+        print "__META__ " endpoints_seen " " required_count
       }
     ' "$CONTRACT_FILE"
   )"
   # ----------------------------------------------------
+  meta_line="$(printf "%s\n" "$REQUIRED_ENDPOINTS" | awk '/^__META__/ {print; exit}')"
+  ENDPOINTS_SEEN="$(echo "$meta_line" | awk '{print $2}')"
+  REQUIRED_COUNT="$(echo "$meta_line" | awk '{print $3}')"
+  REQUIRED_ENDPOINTS="$(printf "%s\n" "$REQUIRED_ENDPOINTS" | awk '!/^__META__/')"
   printf "%s\n" "$REQUIRED_ENDPOINTS"
 }
 
@@ -194,7 +214,13 @@ if [ -n "$PROFILE" ]; then
 fi
 
 required_list="$(contract_required_endpoints)"
-if [ -z "$required_list" ]; then
+echo "CONTRACT_PARSE: endpoints_seen=${ENDPOINTS_SEEN:-0}, required=${REQUIRED_COUNT:-0}"
+if [ "${ENDPOINTS_SEEN:-0}" -eq 0 ]; then
+  echo "No endpoint headers recognized. Please format endpoint lines as one of:"
+  echo "\"## GET /path\" or \"GET /path\" or \"- GET /path\""
+  exit 0
+fi
+if [ "${REQUIRED_COUNT:-0}" -eq 0 ]; then
   echo "No required endpoints found in $CONTRACT_FILE"
   exit 0
 fi
