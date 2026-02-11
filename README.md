@@ -9,6 +9,7 @@
 
 ## 关键文件
 - system-spec/global-system.md
+- system-assets/execution-engine/execution-engine-v1.md
 - workflows/monthly-project-flow.md
 - playbooks/*
 - templates/*

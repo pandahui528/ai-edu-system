@@ -177,6 +177,11 @@ System 1.0 只需要满足以下条件：
 
 ---
 
+## Execution Engine v1（执行引擎）
+Execution Engine v1 是 System 1.0 的执行层资产，用于执行轮次（Execution Round）。
+在阶段2冻结规则空间内实例化与推进，不重新决策产品形态/技术栈。
+详见：../system-assets/execution-engine/execution-engine-v1.md
+
 ## 十、一句留给未来的注释
 
 > **这个系统不是一开始就为所有人准备的，  
